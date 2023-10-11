@@ -1,4 +1,4 @@
-import 'package:banking_system/database_helper.dart';
+import 'package:banking_system/database/database_helper.dart';
 import 'package:banking_system/modules/transactions_module.dart';
 import 'package:banking_system/modules/users_module.dart';
 import 'package:flutter/material.dart';
