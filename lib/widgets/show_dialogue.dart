@@ -6,11 +6,10 @@ class CustomInputDialog extends StatelessWidget {
   final String title;
   final TransactionsController controller;
   final TextEditingController textController;
+  final TextEditingController? extraFieldController;
   final String hintText;
   final String confirmButtonText;
   final String? errorMsg;
-  final Function(String)? onConfirm;
-  final Function(String)? onChanged;
   final Function()? confirmBtn;
   final Widget? extraFields;
 
@@ -23,8 +22,7 @@ class CustomInputDialog extends StatelessWidget {
     required this.controller,
     this.errorMsg,
     this.extraFields,
-    this.onConfirm,
-    this.onChanged,
+    this.extraFieldController,
     this.confirmBtn,
   });
 
@@ -39,7 +37,6 @@ class CustomInputDialog extends StatelessWidget {
           children: [
             TextField(
               keyboardType: TextInputType.number,
-              onChanged: onChanged,
               controller: textController,
               decoration: InputDecoration(
                   hintText: hintText, errorText: controller.errorMsg!.value),
@@ -53,6 +50,9 @@ class CustomInputDialog extends StatelessWidget {
           child: const Text('Cancel'),
           onPressed: () {
             textController.clear();
+            if (extraFields != null) {
+              extraFieldController!.clear();
+            }
             controller.errorMsg!.value = "";
             controller.update();
             Get.back();
@@ -62,6 +62,9 @@ class CustomInputDialog extends StatelessWidget {
             onPressed: () async {
               await confirmBtn!();
               textController.clear();
+              if (extraFields != null) {
+                extraFieldController!.clear();
+              }
             },
             child: Text(confirmButtonText)),
       ],
@@ -75,6 +78,7 @@ class CustomInputDialog extends StatelessWidget {
       required TransactionsController controller,
       required String hintText,
       required String confirmButtonText,
+      TextEditingController? extraFieldController,
       String? errorMsg,
       Function()? confirmBtn,
       Widget? extraFields}) async {
@@ -87,9 +91,10 @@ class CustomInputDialog extends StatelessWidget {
           textController: textController,
           hintText: hintText,
           confirmButtonText: confirmButtonText,
-          errorMsg: controller.errorMsg!.value,
+          errorMsg: errorMsg,
           confirmBtn: confirmBtn,
           extraFields: extraFields,
+          extraFieldController: extraFieldController,
         );
       },
     );

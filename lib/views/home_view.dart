@@ -1,5 +1,6 @@
 import 'package:banking_system/controllers/transactions_controller.dart';
 import 'package:banking_system/widgets/show_dialogue.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,6 +15,8 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final TransactionsController _transactionsController =
       Get.put(TransactionsController());
+  final TextEditingController amountTransfer = TextEditingController();
+  final TextEditingController userPhoneNumber = TextEditingController();
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -136,43 +139,57 @@ class _HomeViewState extends State<HomeView> {
                       Padding(
                         padding: EdgeInsets.only(right: screenWidth * 0.06),
                         child: SizedBox(
-                          width: screenWidth * 0.39,
-                          height: screenHeight * 0.045,
-                          child: TextButton(
-                              onPressed: () async {
-                                CustomInputDialog.show(
-                                    context: context,
-                                    title: "Transaction",
-                                    textController: TextEditingController(),
-                                    hintText: "Amount to Transfer",
-                                    confirmButtonText: "Confirm",
-                                    extraFields: TextField(
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                          hintText: "hintText",
-                                          errorText: _transactionsController
-                                              .errorMsg!.value),
-                                    ),
-                                    errorMsg:
-                                        _transactionsController.errorMsg!.value,
-                                    controller: TransactionsController());
-                              },
-                              style: TextButton.styleFrom(
-                                  alignment: Alignment.topCenter,
-                                  fixedSize: const Size(150, 40),
-                                  shadowColor: Colors.black,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15)),
-                                  backgroundColor: Colors.deepPurpleAccent[400],
-                                  elevation: 15),
-                              child: Text(
-                                "Transfer",
-                                style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold),
-                              )),
-                        ),
+                            width: screenWidth * 0.39,
+                            height: screenHeight * 0.045,
+                            child: TextButton(
+                                onPressed: () async {
+                                  CustomInputDialog.show(
+                                      context: context,
+                                      title: "Transaction",
+                                      textController: amountTransfer,
+                                      hintText: "Amount to Transfer",
+                                      confirmButtonText: "Confirm",
+                                      confirmBtn: () async {
+                                        await _transactionsController
+                                            .transferFromHome(
+                                                amountTransfer.value.text,
+                                                userPhoneNumber.value.text);
+                                      },
+                                      extraFieldController: userPhoneNumber,
+                                      extraFields:
+                                          GetBuilder<TransactionsController>(
+                                              builder: (context) {
+                                        return TextField(
+                                          keyboardType: TextInputType.number,
+                                          controller: userPhoneNumber,
+                                          decoration: InputDecoration(
+                                              hintText: "Phone Number",
+                                              errorText: _transactionsController
+                                                  .errorMsg!.value),
+                                        );
+                                      }),
+                                      errorMsg: _transactionsController
+                                          .errorMsg!.value,
+                                      controller:
+                                          Get.find<TransactionsController>());
+                                },
+                                style: TextButton.styleFrom(
+                                    alignment: Alignment.topCenter,
+                                    fixedSize: const Size(150, 40),
+                                    shadowColor: Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(15)),
+                                    backgroundColor:
+                                        Colors.deepPurpleAccent[400],
+                                    elevation: 15),
+                                child: Text(
+                                  "Transfer",
+                                  style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold),
+                                ))),
                       )
                     ],
                   )
@@ -258,7 +275,6 @@ class _HomeViewState extends State<HomeView> {
             height: screenHeight * 0.3,
             child: GetBuilder<TransactionsController>(builder: (controller) {
               return ListView.builder(
-                reverse: true,
                 shrinkWrap: true,
                 itemCount: controller.transactionsList.length,
                 itemBuilder: (context, index) {
@@ -269,13 +285,17 @@ class _HomeViewState extends State<HomeView> {
                           controller: TextEditingController(text: " "),
                           decoration: InputDecoration(
                             suffixText:
-                                "${controller.transactionsList[index].amount} \$",
+                                "${controller.transactionsList[(controller.transactionsList.length - 1) - index].amount} \$",
                             prefix: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                       controller
-                                          .transactionsList[index].receiverName,
+                                          .transactionsList[(controller
+                                                      .transactionsList.length -
+                                                  1) -
+                                              index]
+                                          .receiverName,
                                       style: GoogleFonts.poppins(
                                           letterSpacing: 2,
                                           fontSize: 15,

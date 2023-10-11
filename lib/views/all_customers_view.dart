@@ -29,84 +29,90 @@ class _AllCustomersState extends State<AllCustomers> {
               fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
-      body: GetBuilder<TransactionsController>(
-          initState: (state) {
-            // currentUser = state.controller!.currentUser;
-          },
-          init: TransactionsController(),
-          builder: (controller) {
-            return ListView.builder(
-                itemCount: controller.usersList.length,
-                itemBuilder: (context, index) {
-                  return SizedBox(
-                    width: screenWidth,
-                    height: screenHeight * 0.12,
-                    child: Card(
-                      color: Colors.deepPurpleAccent[400],
-                      elevation: 15,
-                      borderOnForeground: true,
-                      shadowColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+      body: GetBuilder<TransactionsController>(builder: (controller) {
+        return ListView.builder(
+            itemCount: controller.usersList.length,
+            itemBuilder: (context, index) {
+              return SizedBox(
+                width: screenWidth,
+                height: screenHeight * 0.145,
+                child: Card(
+                  color: Colors.deepPurpleAccent[400],
+                  elevation: 15,
+                  borderOnForeground: true,
+                  shadowColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                controller.usersList[index].firstName,
-                                textAlign: TextAlign.start,
-                                style: GoogleFonts.poppins(
-                                    letterSpacing: 2,
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              IconButton(
-                                  onPressed: () async {
-                                    await CustomInputDialog.show(
-                                      controller:
-                                          Get.find<TransactionsController>(),
-                                      context: context,
-                                      title: "Transaction",
-                                      textController: transferAmount,
-                                      hintText: "Amount to transfer",
-                                      confirmButtonText: "Confirm",
-                                      errorMsg: controller.errorMsg?.value,
-                                      confirmBtn: () async {
-                                        await controller.transactionProcess(
-                                            controller
-                                                .usersList[index].firstName,
-                                            transferAmount.value.text,
-                                            index);
-                                      },
-                                    );
-                                  },
-                                  iconSize: 50,
-                                  color: Colors.white,
-                                  icon: const Icon(Icons.arrow_upward))
-                            ],
+                          Text(
+                            " ${controller.usersList[index].firstName} ${controller.usersList[index].lastName}",
+                            textAlign: TextAlign.start,
+                            style: GoogleFonts.poppins(
+                                letterSpacing: 2,
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                "${controller.usersList[index].userBalance} \$",
-                                style: GoogleFonts.poppins(
-                                  letterSpacing: 1,
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              )
-                            ],
+                          IconButton(
+                              onPressed: () async {
+                                await CustomInputDialog.show(
+                                  controller:
+                                      Get.find<TransactionsController>(),
+                                  context: context,
+                                  title: "Transaction",
+                                  textController: transferAmount,
+                                  hintText: "Amount to transfer",
+                                  confirmButtonText: "Confirm",
+                                  errorMsg: controller.errorMsg?.value,
+                                  confirmBtn: () async {
+                                    await controller.transactionProcess(
+                                        "${controller.usersList[index].firstName} ${controller.usersList[index].lastName}",
+                                        transferAmount.value.text,
+                                        index);
+                                  },
+                                );
+                              },
+                              iconSize: 50,
+                              color: Colors.white,
+                              icon: const Icon(Icons.arrow_upward))
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "Phone Number : ${controller.usersList[index].phoneNumber}",
+                            style: GoogleFonts.poppins(
+                              letterSpacing: 2,
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
                           )
                         ],
                       ),
-                    ),
-                  );
-                });
-          }),
+                      Row(
+                        children: [
+                          Text(
+                            "Balance : ${controller.usersList[index].userBalance} \$",
+                            style: GoogleFonts.poppins(
+                              letterSpacing: 2,
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              );
+            });
+      }),
     );
   }
 }

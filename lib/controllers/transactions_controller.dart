@@ -6,19 +6,23 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class TransactionsController extends GetxController {
-  List<User> usersList = [];
-  List<Transactions> transactionsList = [];
+  RxList<User> usersList = <User>[].obs;
+  RxList<Transactions> transactionsList = <Transactions>[].obs;
   RxString? errorMsg = "".obs;
   final DatabaseHelper _db = DatabaseHelper();
-  final User _currentUser =
-      User(firstName: "Test", lastName: "User", userBalance: 9000, userId: 23);
+  final User _currentUser = User(
+      firstName: "Test",
+      lastName: "User",
+      userBalance: 9000,
+      userId: 23,
+      phoneNumber: "144920232");
 
   User get currentUser => _currentUser;
 
   @override
   onInit() async {
-    usersList = User.fromJsonList(await _db.getUsers());
-    transactionsList = Transactions.fromJsonList(
+    usersList.value = User.fromJsonList(await _db.getUsers());
+    transactionsList.value = Transactions.fromJsonList(
         await _db.getTransactions(currentUser.userId!));
     update();
     super.onInit();
@@ -57,7 +61,7 @@ class TransactionsController extends GetxController {
             style: TextStyle(color: Colors.white, fontSize: 14),
           ),
           backgroundColor: Colors.deepPurpleAccent,
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           icon: const Icon(Icons.money));
     }
   }
@@ -69,9 +73,27 @@ class TransactionsController extends GetxController {
         receiverId: usersList[index].userId!,
         transactionDate: transactionTime,
         senderName: currentUser.firstName,
-        receiverName: usersList[index].firstName,
+        receiverName:
+            "${usersList[index].firstName} ${usersList[index].lastName}",
         amount: amountTransfered));
     update();
+  }
+
+  Future<void> transferFromHome(
+      String amountTransfered, String phoneNumber) async {
+    try {
+      User transferingToUser = await _db.getUserFromNum(phoneNumber);
+      await transactionProcess(transferingToUser.firstName, amountTransfered,
+          transferingToUser.userId! - 1);
+    } catch (e) {
+      if (amountTransfered == "" || phoneNumber == "") {
+        errorMsg!.value = "Field can't be empty !";
+        update();
+      } else {
+        errorMsg!.value = "User not found !";
+        update();
+      }
+    }
   }
 
   String formattedDateTime() {

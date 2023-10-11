@@ -1,3 +1,4 @@
+import 'package:banking_system/modules/users_module.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -10,22 +11,48 @@ class DatabaseHelper {
         version: 1,
         join(
           await getDatabasesPath(),
-          "banking_system4.db",
+          "banking_system5.db",
         ));
   }
 
   _onCreate(Database db, int x) async {
     final List<Map<String, dynamic>> onCreateData = [
-      {"firstName": "First", "lastName": " User", "balance": 3000},
-      {"firstName": "Second", "lastName": "User", "balance": 2500},
-      {"firstName": "Third", "lastName": "User", "balance": 9000},
-      {"firstName": "Fourth", "lastName": "User", "balance": 1000},
-      {"firstName": "Fifth", "lastName": "User", "balance": 10000}
+      {
+        "firstName": "First",
+        "lastName": " User",
+        "phoneNumber": "112233",
+        "balance": 3000
+      },
+      {
+        "firstName": "Second",
+        "lastName": "User",
+        "phoneNumber": "223311",
+        "balance": 2500
+      },
+      {
+        "firstName": "Third",
+        "lastName": "User",
+        "phoneNumber": "443322",
+        "balance": 9000
+      },
+      {
+        "firstName": "Fourth",
+        "lastName": "User",
+        "phoneNumber": "1134566",
+        "balance": 1000
+      },
+      {
+        "firstName": "Fifth",
+        "lastName": "User",
+        "phoneNumber": "221134",
+        "balance": 10000
+      }
     ];
     await db.execute('CREATE TABLE "Users" ('
         'userId INTEGER PRIMARY KEY AUTOINCREMENT, '
         'firstName TEXT NOT NULL, '
         'lastName TEXT NOT NULL, '
+        'phoneNumber TEXT NOT NULL, '
         'balance REAL'
         ')');
 
@@ -48,7 +75,7 @@ class DatabaseHelper {
 
   Future<void> insertOne() async {
     await _db!.rawInsert(
-        'INSERT INTO Users(userId , firstName , lastName , balance) Values(23,"Test","User",9000)');
+        'INSERT INTO Users(userId , firstName , lastName , phoneNumber , balance) Values(23,"Test","User", "144920232",9000)');
   }
 
   Future<dynamic> getUsers() async {
@@ -56,16 +83,6 @@ class DatabaseHelper {
         await _db!.rawQuery("SELECT * FROM Users WHERE userId != ?", [23]);
 
     return fetchedUsers;
-  }
-
-  Future<void> clearTable() async {
-    await _db!.rawDelete("DELETE FROM Transactions");
-  }
-
-  Future<void> addTransaction(int senderId, int receiverId, String senderName,
-      String receiverName, double balance, String transactionTime) async {
-    await _db!.rawInsert(
-        'INSERT INTO Transactions(senderId,receiverId ,senderName, receiverName, balance, transactionTime) VALUES($senderId, $receiverId ,"$senderName", "$receiverName", $balance, "$transactionTime")');
   }
 
   Future<dynamic> getTransactions(int userId) async {
@@ -80,14 +97,30 @@ class DatabaseHelper {
     }
   }
 
+  Future<double> getNewBalance(int userId) async {
+    List<Map<String, dynamic>> newBalance = await _db!
+        .rawQuery('SELECT balance FROM users WHERE userId = ?', [userId]);
+    return newBalance.first['balance'];
+  }
+
+  Future<User> getUserFromNum(String phoneNumber) async {
+    var fetchedUser = await _db!
+        .rawQuery("Select * from Users where phoneNumber = ?", [phoneNumber]);
+    return User.fromJson(fetchedUser.first);
+  }
+
   Future<void> updateUsersBalance(int userId, double newBalance) async {
     await _db!.update("Users", {"balance": newBalance},
         where: 'userId = ?', whereArgs: [userId]);
   }
 
-  Future<double> getNewBalance(int userId) async {
-    List<Map<String, dynamic>> newBalance = await _db!
-        .rawQuery('SELECT balance FROM users WHERE userId = ?', [userId]);
-    return newBalance.first['balance'];
+  Future<void> clearTable() async {
+    await _db!.rawDelete("DELETE FROM Transactions");
+  }
+
+  Future<void> addTransaction(int senderId, int receiverId, String senderName,
+      String receiverName, double balance, String transactionTime) async {
+    await _db!.rawInsert(
+        'INSERT INTO Transactions(senderId,receiverId ,senderName, receiverName, balance, transactionTime) VALUES($senderId, $receiverId ,"$senderName", "$receiverName", $balance, "$transactionTime")');
   }
 }
