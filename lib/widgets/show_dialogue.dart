@@ -39,7 +39,8 @@ class CustomInputDialog extends StatelessWidget {
               keyboardType: TextInputType.number,
               controller: textController,
               decoration: InputDecoration(
-                  hintText: hintText, errorText: controller.errorMsg!.value),
+                  hintText: hintText,
+                  errorText: controller.transactionErrorMsg!.value),
             ),
             extraFields ?? const Text("")
           ],
@@ -53,7 +54,8 @@ class CustomInputDialog extends StatelessWidget {
             if (extraFields != null) {
               extraFieldController!.clear();
             }
-            controller.errorMsg!.value = "";
+            controller.transactionErrorMsg!.value = "";
+            controller.userErrorMsg!.value = "";
             controller.update();
             Get.back();
           },
@@ -61,10 +63,6 @@ class CustomInputDialog extends StatelessWidget {
         TextButton(
             onPressed: () async {
               await confirmBtn!();
-              textController.clear();
-              if (extraFields != null) {
-                extraFieldController!.clear();
-              }
             },
             child: Text(confirmButtonText)),
       ],

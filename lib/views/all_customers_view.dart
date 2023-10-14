@@ -2,7 +2,6 @@ import 'package:banking_system/controllers/transactions_controller.dart';
 import 'package:banking_system/widgets/show_dialogue.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AllCustomers extends StatefulWidget {
@@ -69,12 +68,16 @@ class _AllCustomersState extends State<AllCustomers> {
                                   textController: transferAmount,
                                   hintText: "Amount to transfer",
                                   confirmButtonText: "Confirm",
-                                  errorMsg: controller.errorMsg?.value,
+                                  errorMsg:
+                                      controller.transactionErrorMsg?.value,
                                   confirmBtn: () async {
-                                    await controller.transactionProcess(
-                                        "${controller.usersList[index].firstName} ${controller.usersList[index].lastName}",
-                                        transferAmount.value.text,
-                                        index);
+                                    if (await controller.transactionProcess(
+                                            "${controller.usersList[index].firstName} ${controller.usersList[index].lastName}",
+                                            transferAmount.value.text,
+                                            index) ==
+                                        "Successed") {
+                                      transferAmount.clear();
+                                    }
                                   },
                                 );
                               },

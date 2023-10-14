@@ -8,7 +8,8 @@ import 'package:intl/intl.dart';
 class TransactionsController extends GetxController {
   RxList<User> usersList = <User>[].obs;
   RxList<Transactions> transactionsList = <Transactions>[].obs;
-  RxString? errorMsg = "".obs;
+  RxString? transactionErrorMsg = "".obs;
+  RxString? userErrorMsg = "".obs;
   final DatabaseHelper _db = DatabaseHelper();
   final User _currentUser = User(
       firstName: "Test",
@@ -28,16 +29,19 @@ class TransactionsController extends GetxController {
     super.onInit();
   }
 
-  Future<void> transactionProcess(String receiverName, String amountTransfering,
+  Future<String> transactionProcess(
+      String receiverName, String amountTransfering,
       [int? index]) async {
     double? amountToTransfer = double.tryParse(amountTransfering);
+    userErrorMsg!.value = "";
+    update();
     if (amountToTransfer == null || amountToTransfer <= 0) {
-      errorMsg!.value = "Enter a valid amount !";
+      transactionErrorMsg!.value = "Enter a valid amount !";
       update();
     } else if (currentUser.userBalance < amountToTransfer) {
-      errorMsg!.value = "Insufficient amount !";
+      transactionErrorMsg!.value = "Insufficient amount !";
       update();
-    } else if (!(currentUser.userBalance < amountToTransfer)) {
+    } else if (currentUser.userBalance >= amountToTransfer) {
       var timeNow = formattedDateTime();
       await _db.updateUsersBalance(usersList[index!].userId!,
           (usersList[index].userBalance + amountToTransfer));
@@ -48,7 +52,7 @@ class TransactionsController extends GetxController {
           usersList[index].firstName,
           amountToTransfer,
           timeNow);
-      errorMsg!.value = "";
+      transactionErrorMsg!.value = "";
       usersList[index].userBalance =
           await _db.getNewBalance(usersList[index].userId!);
       addTransactionToHistory(index, amountToTransfer, timeNow);
@@ -63,7 +67,10 @@ class TransactionsController extends GetxController {
           backgroundColor: Colors.deepPurpleAccent,
           snackPosition: SnackPosition.TOP,
           icon: const Icon(Icons.money));
+      return "Successed";
     }
+
+    return "Failed";
   }
 
   void addTransactionToHistory(
@@ -79,21 +86,33 @@ class TransactionsController extends GetxController {
     update();
   }
 
-  Future<void> transferFromHome(
+  Future<String> transferFromHome(
       String amountTransfered, String phoneNumber) async {
     try {
-      User transferingToUser = await _db.getUserFromNum(phoneNumber);
-      await transactionProcess(transferingToUser.firstName, amountTransfered,
-          transferingToUser.userId! - 1);
-    } catch (e) {
-      if (amountTransfered == "" || phoneNumber == "") {
-        errorMsg!.value = "Field can't be empty !";
+      if (phoneNumber == "" && amountTransfered == "") {
+        transactionErrorMsg!.value = "Enter a valid amount !";
+        userErrorMsg!.value = "Enter a valid Number !";
+        update();
+      } else if (phoneNumber == "") {
+        transactionErrorMsg!.value = "";
+        userErrorMsg!.value = "Enter a valid Number !";
+        update();
+      } else if (amountTransfered == "") {
+        userErrorMsg!.value = "";
+        transactionErrorMsg!.value = "Enter a valid amount !";
         update();
       } else {
-        errorMsg!.value = "User not found !";
-        update();
+        User transferingToUser = await _db.getUserFromNum(phoneNumber);
+        await transactionProcess(transferingToUser.firstName, amountTransfered,
+            transferingToUser.userId! - 1);
+        return "Successed";
       }
+    } catch (e) {
+      userErrorMsg!.value = "User not found !";
+      transactionErrorMsg!.value = "";
+      update();
     }
+    return "Failed";
   }
 
   String formattedDateTime() {

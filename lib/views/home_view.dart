@@ -150,10 +150,16 @@ class _HomeViewState extends State<HomeView> {
                                       hintText: "Amount to Transfer",
                                       confirmButtonText: "Confirm",
                                       confirmBtn: () async {
-                                        await _transactionsController
-                                            .transferFromHome(
-                                                amountTransfer.value.text,
-                                                userPhoneNumber.value.text);
+                                        if (await _transactionsController
+                                                .transferFromHome(
+                                                    amountTransfer.value.text,
+                                                    userPhoneNumber
+                                                        .value.text) ==
+                                            "Successed") {
+                                          amountTransfer.clear();
+                                          userPhoneNumber.clear();
+                                        }
+                                        ;
                                       },
                                       extraFieldController: userPhoneNumber,
                                       extraFields:
@@ -165,11 +171,11 @@ class _HomeViewState extends State<HomeView> {
                                           decoration: InputDecoration(
                                               hintText: "Phone Number",
                                               errorText: _transactionsController
-                                                  .errorMsg!.value),
+                                                  .userErrorMsg!.value),
                                         );
                                       }),
                                       errorMsg: _transactionsController
-                                          .errorMsg!.value,
+                                          .userErrorMsg!.value,
                                       controller:
                                           Get.find<TransactionsController>());
                                 },
@@ -274,55 +280,70 @@ class _HomeViewState extends State<HomeView> {
           SizedBox(
             height: screenHeight * 0.3,
             child: GetBuilder<TransactionsController>(builder: (controller) {
-              return ListView.builder(
-                shrinkWrap: true,
-                itemCount: controller.transactionsList.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                      padding: const EdgeInsets.only(left: 5, right: 5),
-                      child: TextField(
-                          enabled: false,
-                          controller: TextEditingController(text: " "),
-                          decoration: InputDecoration(
-                            suffixText:
-                                "${controller.transactionsList[(controller.transactionsList.length - 1) - index].amount} \$",
-                            prefix: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      controller
-                                          .transactionsList[(controller
-                                                      .transactionsList.length -
-                                                  1) -
-                                              index]
-                                          .receiverName,
-                                      style: GoogleFonts.poppins(
-                                          letterSpacing: 2,
-                                          fontSize: 15,
-                                          color: Colors.white)),
-                                  Container(
-                                    alignment: Alignment.centerLeft,
-                                    margin: const EdgeInsets.only(
-                                      top: 5,
-                                      bottom: 5,
+              if (controller.transactionsList.isNotEmpty) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: controller.transactionsList.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                        padding: const EdgeInsets.only(left: 5, right: 5),
+                        child: TextField(
+                            enabled: false,
+                            controller: TextEditingController(text: " "),
+                            decoration: InputDecoration(
+                              suffixText:
+                                  "${controller.transactionsList[(controller.transactionsList.length - 1) - index].amount} \$",
+                              prefix: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        controller
+                                            .transactionsList[(controller
+                                                        .transactionsList
+                                                        .length -
+                                                    1) -
+                                                index]
+                                            .receiverName,
+                                        style: GoogleFonts.poppins(
+                                            letterSpacing: 2,
+                                            fontSize: 15,
+                                            color: Colors.white)),
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      margin: const EdgeInsets.only(
+                                        top: 5,
+                                        bottom: 5,
+                                      ),
+                                      height: 1.5,
+                                      width: 150,
+                                      color: Colors.grey,
                                     ),
-                                    height: 1.5,
-                                    width: 150,
-                                    color: Colors.grey,
-                                  ),
-                                  Text(
-                                      controller.transactionsList[index]
-                                          .transactionDate,
-                                      style: GoogleFonts.poppins(
-                                          letterSpacing: 2,
-                                          fontSize: 13,
-                                          color: Colors.grey))
-                                ]),
-                            suffixStyle: GoogleFonts.poppins(
-                                fontSize: 25, color: Colors.white),
-                          )));
-                },
-              );
+                                    Text(
+                                        controller.transactionsList[index]
+                                            .transactionDate,
+                                        style: GoogleFonts.poppins(
+                                            letterSpacing: 2,
+                                            fontSize: 13,
+                                            color: Colors.grey))
+                                  ]),
+                              suffixStyle: GoogleFonts.poppins(
+                                  fontSize: 25, color: Colors.white),
+                            )));
+                  },
+                );
+              } else {
+                return Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "No transactions",
+                    style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        letterSpacing: 1,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.grey),
+                  ),
+                );
+              }
             }),
           )
         ],
